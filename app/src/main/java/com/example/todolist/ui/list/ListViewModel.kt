@@ -1,11 +1,12 @@
 package com.example.todolist.ui.list
 
 import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
 
 const val KEY_TODO_LIST = "TodoList"
@@ -22,9 +23,7 @@ class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
         checkFirstTimeUser()
     }
 
-    private var _listToDos = MutableLiveData<List<TodoItem>>()
-    val listToDoes: LiveData<List<TodoItem>>
-        get() = _listToDos
+    val listToDos = MutableSharedFlow<List<TodoItem>>()
 
     fun send(event: ViewModelEvents) {      //EVENT MANAGER
         when (event) {
@@ -41,8 +40,10 @@ class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
     }
 
     private fun getAdapterList() {      //RETRIEVE THE LIST FROM PREFERENCES
-        preferences.getString(KEY_TODO_LIST, null)?.let {
-            _listToDos.value = fromJson(it)
+        viewModelScope.launch {
+            preferences.getString(KEY_TODO_LIST, null).let {
+                listToDos.emit(fromJson(it))
+            }
         }
     }
 

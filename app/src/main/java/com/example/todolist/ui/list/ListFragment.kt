@@ -1,18 +1,18 @@
 package com.example.todolist.ui.list
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todolist.MyApplication
 import com.example.todolist.databinding.FragmentListBinding
+import kotlinx.coroutines.launch
 
-class ListFragment() : Fragment() {
+class ListFragment : Fragment() {
 
     companion object {
         fun newInstance() = ListFragment()
@@ -25,8 +25,6 @@ class ListFragment() : Fragment() {
         super.onCreate(savedInstanceState)
 
         viewModel = (requireActivity().application as MyApplication).listViewModel.create(ListViewModel::class.java)
-        viewModel.send(ViewModelEvents.SharedPreferencesResult)     //RETRIEVE SAVED LIST AS SOON AS
-                                                                    //THE FRAGMENT IS CREATED
         binding = FragmentListBinding.inflate(layoutInflater)
     }
 
@@ -34,7 +32,10 @@ class ListFragment() : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding.list.layoutManager = LinearLayoutManager(requireContext())
-        viewModel.listToDoes.observe(viewLifecycleOwner) { setupAdapter(it) }   //LIVEDATA OBSERVER
+        lifecycleScope.launch {
+            viewModel.listToDos.collect { setupAdapter(it) }
+        }
+        viewModel.send(ViewModelEvents.SharedPreferencesResult)
 
         binding.addElementFab.setOnClickListener {      //ADD A NEW ITEM TO THE LIST
             if (binding.editText.text.isNotEmpty()) {
