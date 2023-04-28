@@ -8,9 +8,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.todolist.MyApplication
 import com.example.todolist.databinding.FragmentListBinding
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class ListFragment : Fragment() {
 
@@ -19,12 +19,11 @@ class ListFragment : Fragment() {
     }
 
     private lateinit var binding: FragmentListBinding
-    private lateinit var viewModel: ListViewModel
+    private val viewModel: ListViewModel by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = (requireActivity().application as MyApplication).listViewModel.create(ListViewModel::class.java)
         binding = FragmentListBinding.inflate(layoutInflater)
     }
 
