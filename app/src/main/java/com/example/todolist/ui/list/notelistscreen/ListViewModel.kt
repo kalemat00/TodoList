@@ -1,11 +1,12 @@
-package com.example.todolist.ui.list
+package com.example.todolist.ui.list.notelistscreen
 
 import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
 
 const val KEY_TODO_LIST = "TodoList"
@@ -14,7 +15,7 @@ const val KEY_FIRST_TIME_USER = "firstTimeUser"
 sealed class ViewModelEvents {      //EVENT LIST
     object SharedPreferencesResult : ViewModelEvents()
     data class WriteNewTodoItem(val itemString: String) : ViewModelEvents()
-    data class DeleteToDoItem(val position: Int) : ViewModelEvents()
+    data class DeleteToDoItem(val positions: List<Int>) : ViewModelEvents()
 }
 
 class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
@@ -22,15 +23,13 @@ class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
         checkFirstTimeUser()
     }
 
-    private var _listToDos = MutableLiveData<List<TodoItem>>()
-    val listToDoes: LiveData<List<TodoItem>>
-        get() = _listToDos
+    val listToDos = MutableSharedFlow<List<TodoItem>>()
 
     fun send(event: ViewModelEvents) {      //EVENT MANAGER
         when (event) {
             ViewModelEvents.SharedPreferencesResult -> getAdapterList()
             is ViewModelEvents.WriteNewTodoItem -> addNewItem(TodoItem(event.itemString))
-            is ViewModelEvents.DeleteToDoItem -> deleteSelectedItem(event.position)
+            is ViewModelEvents.DeleteToDoItem -> deleteSelectedItems(event.positions)
         }
     }
 
@@ -41,8 +40,10 @@ class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
     }
 
     private fun getAdapterList() {      //RETRIEVE THE LIST FROM PREFERENCES
-        preferences.getString(KEY_TODO_LIST, null)?.let {
-            _listToDos.value = fromJson(it)
+        viewModelScope.launch {
+            preferences.getString(KEY_TODO_LIST, null).let {
+                listToDos.emit(fromJson(it))
+            }
         }
     }
 
@@ -64,10 +65,10 @@ class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
         getAdapterList()
     }
 
-    private fun deleteSelectedItem(itemPosition: Int) {
-        preferences.getString(KEY_TODO_LIST, null)?.let {
-            val newList = fromJson(it)
-            newList.removeAt(itemPosition)
+    private fun deleteSelectedItems(itemPositions: List<Int>) {
+        preferences.getString(KEY_TODO_LIST, null)?.let {jsonString ->
+            val newList = fromJson(jsonString)
+            itemPositions.sorted().asReversed().forEach { newList.removeAt(it) }
             preferences.edit()
                 .putString(KEY_TODO_LIST, toJson(newList))
                 .apply()

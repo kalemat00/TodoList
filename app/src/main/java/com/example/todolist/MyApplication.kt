@@ -1,15 +1,17 @@
 package com.example.todolist
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
+import com.example.todolist.di.appModule
+import com.example.todolist.di.viewModels
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.GlobalContext.startKoin
 
 class MyApplication: Application() {
-    lateinit var sharedPreferences: SharedPreferences
-    lateinit var listViewModel: ViewModelFactory
     override fun onCreate() {
         super.onCreate()
-        sharedPreferences = getSharedPreferences("app", Context.MODE_PRIVATE)
-        listViewModel = ViewModelFactory(sharedPreferences)
+        startKoin{
+            androidContext(this@MyApplication)
+            modules(listOf(appModule, viewModels))
+        }
     }
 }
