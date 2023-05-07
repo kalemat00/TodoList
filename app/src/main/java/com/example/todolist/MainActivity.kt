@@ -2,17 +2,17 @@ package com.example.todolist
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.todolist.ui.list.ListFragment
+import com.example.todolist.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-
+private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, ListFragment.newInstance())
-                .commitNow()
-        }
+
+        supportActionBar?.hide()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
     }
 }

@@ -1,4 +1,4 @@
-package com.example.todolist.ui.list
+package com.example.todolist.ui.list.notelistscreen
 
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
@@ -15,7 +15,7 @@ const val KEY_FIRST_TIME_USER = "firstTimeUser"
 sealed class ViewModelEvents {      //EVENT LIST
     object SharedPreferencesResult : ViewModelEvents()
     data class WriteNewTodoItem(val itemString: String) : ViewModelEvents()
-    data class DeleteToDoItem(val position: Int) : ViewModelEvents()
+    data class DeleteToDoItem(val positions: List<Int>) : ViewModelEvents()
 }
 
 class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
@@ -29,7 +29,7 @@ class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
         when (event) {
             ViewModelEvents.SharedPreferencesResult -> getAdapterList()
             is ViewModelEvents.WriteNewTodoItem -> addNewItem(TodoItem(event.itemString))
-            is ViewModelEvents.DeleteToDoItem -> deleteSelectedItem(event.position)
+            is ViewModelEvents.DeleteToDoItem -> deleteSelectedItems(event.positions)
         }
     }
 
@@ -65,10 +65,10 @@ class ListViewModel(private val preferences: SharedPreferences) : ViewModel() {
         getAdapterList()
     }
 
-    private fun deleteSelectedItem(itemPosition: Int) {
-        preferences.getString(KEY_TODO_LIST, null)?.let {
-            val newList = fromJson(it)
-            newList.removeAt(itemPosition)
+    private fun deleteSelectedItems(itemPositions: List<Int>) {
+        preferences.getString(KEY_TODO_LIST, null)?.let {jsonString ->
+            val newList = fromJson(jsonString)
+            itemPositions.sorted().asReversed().forEach { newList.removeAt(it) }
             preferences.edit()
                 .putString(KEY_TODO_LIST, toJson(newList))
                 .apply()

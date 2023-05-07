@@ -1,26 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="50dp"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/list_item">
+    android:id="@+id/list_item"
+    android:clickable="true"
+    android:focusable="true"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="10dp">
 
     <TextView
         android:id="@+id/list_text"
+        android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        tools:text="List_text"
         android:textSize="24sp"
-        android:gravity="center"
-        android:layout_marginStart="12dp"/>
+        android:gravity="start"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="List_textssssssssssssssssssssssssssssssssss"/>
 
-    <Button
-        android:id="@+id/list_button"
-        android:layout_weight="0.5"
+    <CheckBox
+        android:layout_gravity="end"
+        android:id="@+id/check_box"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:text="@string/delete"
         android:gravity="center"
         android:layout_marginStart="12dp"/>
 
